@@ -29,16 +29,17 @@ col1.metric("Total Transactions", len(filtered_df))
 col2.metric("Total Frauds Detected", int(filtered_df['Is_Fraud'].sum()))
 col3.metric("Avg Transaction Amount (₹)", f"₹ {filtered_df['Amount_INR'].mean():,.2f}")
 
-st.subheader("Filtered Transaction Records")
-st.dataframe(filtered_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']].head(100))
+# Checkbox toggle for switching between all records and fraud-only records
+show_fraud_only = st.checkbox("🔍 Show Only Fraudulent Transactions")
 
-st.subheader(f"⚠️ High-Risk Fraud Users List for {selected_city}")
-fraud_df = filtered_df[filtered_df['Fraud_Risk_Score'] > 70]
-
-if not fraud_df.empty:
-    st.dataframe(fraud_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Fraud_Risk_Score', 'Device_Type']])
+if show_fraud_only:
+    table_df = filtered_df[filtered_df['Is_Fraud'] == 1]
+    st.subheader(f"⚠️ High-Risk Fraud Transactions List for {selected_city}")
 else:
-    st.write(f"Ya city madhe kontyahi high-risk fraud users sapadle nahiyet.")
+    table_df = filtered_df
+    st.subheader("Filtered Transaction Records")
+
+st.dataframe(table_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']].head(100))
 
 st.subheader("Fraud Distribution by Location")
 fig, ax = plt.subplots(figsize=(10, 4))
