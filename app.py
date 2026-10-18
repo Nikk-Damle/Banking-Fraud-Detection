@@ -32,6 +32,14 @@ col3.metric("Avg Transaction Amount (₹)", f"₹ {filtered_df['Amount_INR'].mea
 st.subheader("Filtered Transaction Records")
 st.dataframe(filtered_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']].head(100))
 
+st.subheader(f"⚠️ High-Risk Fraud Users List for {selected_city}")
+fraud_df = filtered_df[filtered_df['Fraud_Risk_Score'] > 70]
+
+if not fraud_df.empty:
+    st.dataframe(fraud_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Fraud_Risk_Score', 'Device_Type']])
+else:
+    st.write(f"Ya city madhe kontyahi high-risk fraud users sapadle nahiyet.")
+
 st.subheader("Fraud Distribution by Location")
 fig, ax = plt.subplots(figsize=(10, 4))
 sns.countplot(data=filtered_df, x='Location_City', hue='Is_Fraud', palette='Set2', ax=ax)
