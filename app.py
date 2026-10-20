@@ -34,10 +34,14 @@ st.markdown('<p class="subtitle-style">Real-time Transaction Analytics, Risk Sco
 
 @st.cache_data
 def load_data():
-    return pd.read_csv('banking_fraud_data_scored.csv')
+    data = pd.read_csv('banking_fraud_data_scored.csv')
+    # Clean any missing/null values so zero-filtering takes 100% available rows
+    data = data.dropna(subset=['Fraud_Risk_Score'])
+    return data
 
 df = load_data()
 
+# Actual total rows present in your loaded CSV file
 total_dataset_records = len(df)
 
 # Sidebar Filters
