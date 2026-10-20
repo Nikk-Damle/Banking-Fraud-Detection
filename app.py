@@ -50,8 +50,8 @@ def load_data():
 
 df = load_data()
 
-# Dynamic count of total records matching actual dataset rows
-total_dataset_records = len(df)
+# Fixed total records value as requested
+total_dataset_records = 50000
 
 # Sidebar Filters
 st.sidebar.header("🎯 Control Panel")
