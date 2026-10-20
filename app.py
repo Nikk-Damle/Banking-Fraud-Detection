@@ -1,32 +1,36 @@
 import streamlit as st
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 # Page Configuration
 st.set_page_config(page_title="Banking & UPI Fraud Risk Hub", layout="wide", initial_sidebar_state="expanded")
 
-# Custom CSS for Modern Styling & Title alignment
+# Custom CSS for Modern Styling, Medium-Large Title & Layout Polish
 st.markdown("""
     <style>
         .main { background-color: #0f172a; color: #f8fafc; }
         .sidebar .sidebar-content { background-color: #1e293b; }
         .title-style {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 800;
             color: #38bdf8;
             text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .subtitle-style {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 16px;
+            margin-bottom: 25px;
         }
         h3 { color: #cbd5e1; }
     </style>
 """, unsafe_allow_html=True)
 
-# Title with Both Sides Symbols and Single Line Capital Format
+# Title with Proper Medium-Large Size, Both Sides Symbols and Single Line Format
 st.markdown('<p class="title-style">🚨 INDIAN BANKING & UPI FRAUD DETECTION HUB 🚨</p>', unsafe_allow_html=True)
-st.markdown("<h5 style='text-align: center; color: #94a3b8;'>Real-time Transaction Analytics, Risk Scoring & City-wise Intelligence</h5>", unsafe_allow_html=True)
+st.markdown('<p class="subtitle-style">Real-time Transaction Analytics, Risk Scoring & City-wise Intelligence</p>', unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -36,7 +40,7 @@ df = load_data()
 
 total_dataset_records = len(df)
 
-# Sidebar Filters - Risk score normalized strictly from 0.0 to 1.0
+# Sidebar Filters
 st.sidebar.header("🎯 Control Panel")
 selected_city = st.sidebar.selectbox("Select City", options=['All'] + sorted(list(df['Location_City'].unique())))
 
@@ -65,10 +69,10 @@ show_fraud_only = st.sidebar.checkbox("🔍 Show Only Fraudulent Transactions")
 
 if show_fraud_only:
     table_df = filtered_df[filtered_df['Is_Fraud'] == 1]
-    st.subheader(f"⚠️ High-Risk Fraud Transactions List (City: {selected_city}) — Total Found: {len(table_df):,}")
+    st.subheader(f"⚠️ High-Risk Fraud Transactions List (City: {selected_city})")
 else:
     table_df = filtered_df
-    st.subheader(f"📋 Transaction Records Master Table (Showing all {len(table_df):,} records)")
+    st.subheader("📋 Transaction Records Table")
 
 # Display table with mapped Is_Fraud status for better readability (0 = Safe, 1 = Fraud)
 display_table = table_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']].copy()
@@ -77,13 +81,26 @@ display_table['Status'] = display_table['Is_Fraud'].apply(lambda x: '🚨 Fraud 
 st.dataframe(display_table[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Status']], use_container_width=True)
 
 st.markdown("---")
-st.subheader("📊 City-wise Fraud Distribution Insights")
-fig, ax = plt.subplots(figsize=(12, 5))
-sns.countplot(data=filtered_df, x='Location_City', hue='Is_Fraud', palette='viridis', ax=ax)
-plt.xticks(rotation=45, ha='right')
-ax.set_facecolor('#0f172a')
-fig.patch.set_facecolor('#0f172a')
-ax.tick_params(colors='white')
-ax.xaxis.label.set_color('white')
-ax.yaxis.label.set_color('white')
-st.pyplot(fig)
+st.subheader("📊 City-wise Fraud Distribution Insights (Interactive)")
+
+# Modern Interactive Plotly Bar Chart instead of boring static Seaborn chart
+fig = px.histogram(
+    filtered_df, 
+    x='Location_City', 
+    color='Is_Fraud', 
+    barmode='group',
+    color_discrete_map={0: '#38bdf8', 1: '#f43f5e'},
+    labels={'Is_Fraud': 'Transaction Status (0=Safe, 1=Fraud)', 'Location_City': 'City', 'count': 'Transaction Count'}
+)
+
+fig.update_layout(
+    plot_bgcolor='#0f172a',
+    paper_bgcolor='#0f172a',
+    font_color='#f8fafc',
+    xaxis=dict(title='City', gridcolor='#1e293b'),
+    yaxis=dict(title='Transaction Count', gridcolor='#1e293b'),
+    legend=dict(title='Status', bgcolor='#1e293b', bordercolor='#334155'),
+    margin=dict(l=20, r=20, t=20, b=20)
+)
+
+st.plotly_chart(fig, use_container_width=True)
