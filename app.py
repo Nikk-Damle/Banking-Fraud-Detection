@@ -47,7 +47,6 @@ def load_data():
     # Direct Raw URL from your GitHub repository so Streamlit Cloud can read it smoothly
     url = "https://raw.githubusercontent.com/Nikk-Damle/Banking-Fraud-Detection/main/banking_fraud_data_scored.csv"
     data = pd.read_csv(url)
-    data = data.dropna(subset=['Fraud_Risk_Score'])
     return data
 
 df = load_data()
