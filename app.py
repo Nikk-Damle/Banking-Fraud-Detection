@@ -44,13 +44,13 @@ st.markdown('<p class="subtitle-style">Real-time Transaction Analytics, Risk Sco
 
 @st.cache_data
 def load_data():
-    # Direct Raw URL from your GitHub repository so Streamlit Cloud can read it smoothly
     url = "https://raw.githubusercontent.com/Nikk-Damle/Banking-Fraud-Detection/main/banking_fraud_data_scored.csv"
     data = pd.read_csv(url)
     return data
 
 df = load_data()
 
+# Dynamic count of total records matching actual dataset rows
 total_dataset_records = len(df)
 
 # Sidebar Filters
@@ -60,7 +60,6 @@ selected_city = st.sidebar.selectbox("Select City", options=['All'] + sorted(lis
 min_score = float(df['Fraud_Risk_Score'].min())
 max_score = float(df['Fraud_Risk_Score'].max())
 
-# Default value strictly set to 0.0
 risk_filter = st.sidebar.slider("Minimum Fraud Risk Score", min_value=0.0, max_value=1.0, value=0.0, step=0.01)
 
 # Filtering Logic
@@ -89,7 +88,6 @@ else:
     table_df = filtered_df
     st.subheader("📋 Transaction Records Table")
 
-# Display table with mapped Is_Fraud status
 display_table = table_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']].copy()
 display_table['Status'] = display_table['Is_Fraud'].apply(lambda x: '🚨 Fraud (1)' if x == 1 else '✅ Safe (0)')
 
@@ -98,7 +96,6 @@ st.dataframe(display_table[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location
 st.markdown("---")
 st.subheader("📊 City-wise Fraud Distribution Insights (Interactive)")
 
-# Modern Interactive Plotly Bar Chart
 fig = px.histogram(
     filtered_df, 
     x='Location_City', 
