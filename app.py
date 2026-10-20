@@ -6,19 +6,27 @@ import matplotlib.pyplot as plt
 # Page Configuration
 st.set_page_config(page_title="Banking & UPI Fraud Risk Hub", layout="wide", initial_sidebar_state="expanded")
 
-# Custom CSS for Modern, Clean Look & Styling
+# Custom CSS for Modern Styling & Title alignment
 st.markdown("""
     <style>
         .main { background-color: #0f172a; color: #f8fafc; }
         .sidebar .sidebar-content { background-color: #1e293b; }
-        h1 { color: #38bdf8; font-family: 'Helvetica Neue', sans-serif; }
+        .title-style {
+            font-size: 28px;
+            font-weight: bold;
+            color: #38bdf8;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         h3 { color: #cbd5e1; }
-        .metric-card { background-color: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🚨 Indian Banking & UPI Fraud Detection Hub")
-st.markdown("### Real-time Transaction Analytics, Risk Scoring & City-wise Intelligence")
+# Title with Both Sides Symbols and Single Line Capital Format
+st.markdown('<p class="title-style">🚨 INDIAN BANKING & UPI FRAUD DETECTION HUB 🚨</p>', unsafe_allow_html=True)
+st.markdown("<h5 style='text-align: center; color: #94a3b8;'>Real-time Transaction Analytics, Risk Scoring & City-wise Intelligence</h5>", unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -26,13 +34,15 @@ def load_data():
 
 df = load_data()
 
-# Total Records in Dataset (e.g. ~50k)
 total_dataset_records = len(df)
 
-# Sidebar Filters
+# Sidebar Filters - Risk score normalized strictly from 0.0 to 1.0
 st.sidebar.header("🎯 Control Panel")
 selected_city = st.sidebar.selectbox("Select City", options=['All'] + sorted(list(df['Location_City'].unique())))
-risk_filter = st.sidebar.slider("Minimum Fraud Risk Score", float(df['Fraud_Risk_Score'].min()), float(df['Fraud_Risk_Score'].max()), float(df['Fraud_Risk_Score'].min()))
+
+min_score = float(df['Fraud_Risk_Score'].min())
+max_score = float(df['Fraud_Risk_Score'].max())
+risk_filter = st.sidebar.slider("Minimum Fraud Risk Score", min_value=0.0, max_value=1.0, value=0.0, step=0.01)
 
 # Filtering Logic
 filtered_df = df.copy()
@@ -60,8 +70,11 @@ else:
     table_df = filtered_df
     st.subheader(f"📋 Transaction Records Master Table (Showing all {len(table_df):,} records)")
 
-# FIXED: Removed .head(100) so FULL filtered data (up to 50k) displays properly with pagination built into st.dataframe!
-st.dataframe(table_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']], use_container_width=True)
+# Display table with mapped Is_Fraud status for better readability (0 = Safe, 1 = Fraud)
+display_table = table_df[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Is_Fraud']].copy()
+display_table['Status'] = display_table['Is_Fraud'].apply(lambda x: '🚨 Fraud (1)' if x == 1 else '✅ Safe (0)')
+
+st.dataframe(display_table[['Transaction_ID', 'User_ID', 'Amount_INR', 'Location_City', 'Device_Type', 'Fraud_Risk_Score', 'Status']], use_container_width=True)
 
 st.markdown("---")
 st.subheader("📊 City-wise Fraud Distribution Insights")
