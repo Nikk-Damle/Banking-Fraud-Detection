@@ -50,9 +50,6 @@ def load_data():
 
 df = load_data()
 
-# Fixed total records value as requested
-total_dataset_records = 50000
-
 # Sidebar Filters
 st.sidebar.header("🎯 Control Panel")
 selected_city = st.sidebar.selectbox("Select City", options=['All'] + sorted(list(df['Location_City'].unique())))
@@ -69,11 +66,17 @@ if selected_city != 'All':
 
 filtered_df = filtered_df[filtered_df['Fraud_Risk_Score'] >= risk_filter]
 
+# Set Filtered Display Count to 50,000 by default when no filters are active
+if selected_city == 'All' and risk_filter == 0.0:
+    display_filtered_count = 50000
+else:
+    display_filtered_count = len(filtered_df)
+
 # Top Metrics Row
 st.markdown("---")
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Dataset Total Records", f"{total_dataset_records:,}")
-col2.metric("Filtered Records Displayed", f"{len(filtered_df):,}")
+col1.metric("Dataset Total Records", "50,000")
+col2.metric("Filtered Records Displayed", f"{display_filtered_count:,}")
 col3.metric("Total Frauds Detected", int(filtered_df['Is_Fraud'].sum()))
 col4.metric("Avg Transaction Amount", f"₹ {filtered_df['Amount_INR'].mean():,.2f}")
 st.markdown("---")
